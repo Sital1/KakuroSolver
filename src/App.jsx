@@ -13,57 +13,133 @@ function App() {
   ];
   // State to hold the current values of the puzzle
   const [puzzle, setPuzzle] = useState(initialPuzzle);
+
+  // states to hold the puzzle solution
+  const [solvedPuzzle, setSolvedPuzzle] = useState([]);
+  const [solutionSteps, setSolutionSteps] = useState([]);
+  const [hintsEnabled, setHintsEnabled] = useState(false);
+  const [fillable, setfillable] = useState([]);
+
+
+  const solvePuzzleImmediately = () => {
+
+
+    const clone = deepCloneArray(puzzle);
+    const solver = new KakuroBacktracking(clone);
+    const solutionSteps = solver.solveBackTrack();
+    setSolvedPuzzle([...solver.board]);
+    setSolutionSteps([...solver.steps]);
+    const fillable = solver.fillable
+    console.log(fillable)
+    setfillable([...fillable]);
+
+  };
+
+  useEffect(() => {
+
+    solvePuzzleImmediately();
+  }, []);
+
+  useEffect(() => {
+    console.log("callllled");
+   }, [puzzle])
+
+
+
+  // states for showing solution
   const [showBackTracking, setShowBackTracking] = useState(false);
   const [isSolving, setIsSolving] = useState(false);
   const [speed, setSpeed] = useState(500);
-  const [stop, setStop] = useState(false);
-
+  const stop = useRef(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const speedDelta = 50;
   const animationSpeed = useRef(speed);
 
-  const [steps, setSteps] = useState(0);
+
+  function deepCloneArray(arr) {
+    return arr.map(item => {
+      if (Array.isArray(item)) {
+        return deepCloneArray(item);
+      } else if (typeof item === 'object' && item !== null) {
+        return { ...item };
+      }
+      return item;
+    });
+  }
 
   // Function to reset the puzzle to its initial state
   const resetPuzzle = () => {
     setPuzzle([...initialPuzzle]);
   };
+
+  const validatePuzzle = () => {
+    const newPuzzle = puzzle.map((row, rowIndex) => {
+      return row.map((cell, colIndex) => {
+        if (!["X", "\\","0"].some(char => cell.includes(char))) { // Assuming these denote non-fillable cells
+          const correctValue = solvedPuzzle[rowIndex][colIndex];
+          if (cell !== correctValue) {
+            return `${cell}*`; // Mark incorrect cells
+          }
+        }
+        return cell;
+      });
+    });
+  
+    setPuzzle(newPuzzle);
+  };
+  
+  useEffect(() => {
+    if (hintsEnabled) {
+      validatePuzzle();
+    }
+  }, [hintsEnabled]);
+
   const onCellChange = (rowIndex, cellIndex, value) => {
-    // Create a new puzzle state based on current state
     const newPuzzle = puzzle.map((row, i) => {
       if (i === rowIndex) {
         return row.map((cell, j) => {
-          if (j === cellIndex) {
-            // Only update cells that are not blocked or sums
-            return cell === "0" || (!cell.includes("\\") && !cell.includes("X") && !cell.includes("/")) ? value : cell;
+          // Check if it's the cell being changed and if it's not a blocked cell
+          if (j === cellIndex && (!cell.includes("\\") && !cell.includes("X") && !cell.includes("/"))) {
+            // Apply hints only if they are enabled
+            if (hintsEnabled) {
+              const correctValue = solvedPuzzle[rowIndex][cellIndex];
+              console.log(correctValue);
+              const isCorrect = value === correctValue;
+              return isCorrect ? value : `${value}*`; // Mark incorrect values only if hints are enabled
+            } else {
+              return value; // If hints are not enabled, just update the value normally
+            }
           }
           return cell;
         });
       }
       return [...row];
     });
-
+    console.log("Setting Puzzle");
     setPuzzle(newPuzzle);
   };
 
   const showAnimation = async (steps) => {
-    for (let i = 0; i < steps.length; i++) {
-      setPuzzle(steps[i]);
-      setSteps(i);
-      console.log(1100 - speed);
+    for (let i = 0; i < solutionSteps.length; i++) {
+      while (stop.current) {
+        console.log("stopped");
+        await new Promise(resolve => setTimeout(resolve, 100)); // Pause here if stopped
+      }
+      setPuzzle(solutionSteps[i]);
+      // setSteps(i);
       await new Promise((resolve) => setTimeout(resolve, animationSpeed.current));
     }
   }
 
   const solvePuzzle = async () => {
-    const solver = new KakuroBacktracking(puzzle);
-    const solvedBoard = solver.solveBackTrack();
+    setHasStarted(true);
+
     setIsSolving(true);
     if (showBackTracking) {
-      const steps = solver.steps;
-      await showAnimation(steps);
+      await showAnimation();
       setIsSolving(false)
     } else {
-      setPuzzle([...solver.board]);
+      setPuzzle(prev => [...solvedPuzzle]);
       setIsSolving(false);
     }
   };
@@ -72,25 +148,45 @@ function App() {
     <div className="appContainer">
       <div className="kakuroContainer">
         <h1>Kakuro Puzzle</h1>
-        <KakuroGrid puzzle={puzzle} onCellChange={onCellChange} disabled={isSolving} />
-        <div>
-          <button onClick={resetPuzzle} style={{ marginTop: '20px', fontSize: '10px', padding: '10px 20px' }}>Reset Puzzle</button>
-          <button onClick={solvePuzzle} style={{ marginTop: '20px', fontSize: '10px', padding: '10px 20px' }}>Solve Puzzle</button>
-          <button onClick={() => setStop(!stop)} style={{ marginTop: '20px', fontSize: '10px', padding: '10px 20px' }}>{stop ? "Resume" : "Stop"}</button>
+        <KakuroGrid fillable={fillable} puzzle={puzzle} onCellChange={onCellChange} disabled={isSolving} />
+        <div className='button-group'>
+          <button className='button reset-button ' onClick={resetPuzzle} >Reset Puzzle</button>
+          <button className='button solve-button' onClick={solvePuzzle} >Solve Puzzle</button>
+          {(hasStarted && showBackTracking) && (
+            <button onClick={() => {
+              stop.current = !stop.current;
+              setIsSolving(!stop.current);
+            }}
+              className={`button ${stop.current ? 'resume-button' : 'stop-button'}`}
+
+            >
+              {stop.current ? "Resume" : "Stop"}
+            </button>
+          )}
           <input
             type="checkbox"
             checked={showBackTracking}
             onChange={(e) => setShowBackTracking(e.target.checked)}
           />
           <label>Show Backtracking</label>
-          <div>
-            <input step={speedDelta} type="range" min="100" max="1000" value={speed} className="slider" id="myRange" onChange={
-              (e) => {
-                setSpeed(e.target.value)
-                animationSpeed.current = 1100 - speed;
-              }} />
-          </div>
         </div>
+        <div className='slider'>
+          <span>Speed: </span>
+          <input step={speedDelta} type="range" min="100" max="1000" value={speed} id="myRange" onChange={
+            (e) => {
+              setSpeed(e.target.value)
+              animationSpeed.current = 1100 - speed;
+            }} />
+          <label>
+            <input
+              type="checkbox"
+              checked={hintsEnabled}
+              onChange={(e) => setHintsEnabled(e.target.checked)}
+            />
+            Enable Hints
+          </label>
+        </div>
+
       </div>
 
       <div className="rulesContainer">

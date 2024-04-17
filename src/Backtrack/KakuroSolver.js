@@ -24,6 +24,7 @@ class SumClue {
 
 export class KakuroBacktracking {
     constructor(board) {
+        console.log("called");
         this.board = board;
         this.rowClues = [];
         this.columnClues = [];
@@ -31,7 +32,8 @@ export class KakuroBacktracking {
         this.emptyGrids = [];
         this.boardRow = board.length;
         this.boardCol = board[0].length;
-        this.steps=[]
+        this.steps=[]        
+        this.fillable = []     
         this.extractClues();
     }
 
@@ -41,7 +43,10 @@ export class KakuroBacktracking {
                 const cell = this.board[row][col];
                 if (cell === "X") {
                     this.emptyGrids.push(new GridPoint(row, col));
-                } else if (cell.includes("\\")) {
+                }else if(cell === "0"){
+                    this.fillable.push(new GridPoint(row,col))
+                }
+                else if (cell.includes("\\")) {
                     this.clueGrids.push(new GridPoint(row, col));
                     const parts = cell.split("\\");
                     if (parts[0].length > 0 && parts[0] !== "X") {
@@ -77,7 +82,6 @@ export class KakuroBacktracking {
 
     solveBackTrack() {
         if (this.solveBackTrackHelper(0, 0)) {
-            this.printBoard();
             return true;
         } else {
             console.log("No solution or the problem space is too large");
