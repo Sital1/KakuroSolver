@@ -1,21 +1,31 @@
 .appContainer {
     display: flex;
-    justify-content: space-between; /* Ensures the puzzle and the rules are spaced out */
-    align-items: flex-start; /* Aligns items at the start of the container */
-    height: 100vh; /* Uses full view height */
+    justify-content: space-between; 
+    align-items: flex-start; 
+    min-height: 100vh; 
     padding: 20px;
 }
 
+
+.sidebar {
+  width: 15%;
+  background-color: #f4f4f4; 
+  margin-top: 80px;
+  padding: 20px; 
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
+}
+
 .kakuroContainer {
-    flex-grow: 1; /* Allows the puzzle container to take up available space */
+    flex-grow: 1; 
+    width: 60%;
     display: flex;
-    flex-direction: column; /* Stacks children vertically */
-    align-items: center; /* Centers the children horizontally */
-    margin-right: 20px; /* Provides space between this container and the rules */
+    flex-direction: column; 
+    align-items: center; 
+    margin-right: 20px; 
 }
 
 .rulesContainer {
-    width: 300px; /* Fixed width for the rules */
+    width: 25%; 
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -80,15 +90,24 @@
   }
   
   .reset-button {
-    background-color: #0e0c0c; /* Red */
+    background-color: #0e0c0c; 
+  }
+
+  .button:disabled:hover {
+    background-color: #CCCCCC;  
   }
   
   .solve-button {
-    background-color: #d0c229; /* Green */
+    background-color: #d0c229; 
+  }
+
+  .button:disabled{
+    background-color: grey;
+    cursor:not-allowed;
   }
   
   .stop-button {
-    background-color: #c2171d; /* Blue */
+    background-color: #c2171d; 
   }
 
   .resume-button{
@@ -96,6 +115,12 @@
   }
   
   .stop-button:disabled {
-    background-color: #cccccc; /* Grey when disabled */
+    background-color: #cccccc; 
     cursor: not-allowed;
   }
+
+  .solved-message {
+    margin-top: 5px;
+    padding: 5px;
+    color: #4CAF50; 
+}

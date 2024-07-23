@@ -24,7 +24,6 @@ class SumClue {
 
 export class KakuroBacktracking {
     constructor(board) {
-        console.log("called");
         this.board = board;
         this.rowClues = [];
         this.columnClues = [];

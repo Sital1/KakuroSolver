@@ -1,9 +1,6 @@
 export default function Square({value,onChange,disabled,isFillable}) {
   const isBlocked = value === "X";
   const isEmpty = value === "0";
-  if(isFillable){
-    console.log(value,isFillable)
-  }
 
   const isSum = value.includes('\\') || value.includes('/');
 
@@ -15,8 +12,8 @@ export default function Square({value,onChange,disabled,isFillable}) {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '80px',
-    width: '80px',
+    minHeight: '50px',
+    width: '50px',
     fontSize: isSum ? 'small' : 'medium'
   };
 
