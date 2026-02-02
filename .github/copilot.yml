@@ -1,0 +1,8 @@
+language: javascript
+guidelines:
+  tone: "professional, constructive, mentoring"
+  style: "follow latest js standards"
+rules:
+  - "If pointing out a bug, propose a concise fix."
+  - "Avoid acronyms without explanation."
+  - "Do not suggest TODOs unless actionable."
