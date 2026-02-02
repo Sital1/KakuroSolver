@@ -79,6 +79,8 @@ export class KakuroBacktracking {
         return endCol;
     }
 
+
+    
     solveBackTrack() {
         if (this.solveBackTrackHelper(0, 0)) {
             return true;
@@ -88,6 +90,8 @@ export class KakuroBacktracking {
         }
     }
 
+
+    
     solveBackTrackHelper(row, col) {
         if (row >= this.boardRow) {
             return true;
@@ -119,6 +123,8 @@ export class KakuroBacktracking {
         return false;
     }
 
+
+    
     isValid(row, col, num) {
         num = parseInt(num);
 
